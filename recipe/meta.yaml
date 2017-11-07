@@ -2,7 +2,7 @@
 {% set sha256 = "019f23c2192df793ac746595e94a403908749f8e0c484b403476d2611dd20970" %}
 
 {% set clang_variant = os.environ.get('CLANG_VARIANT', 'default') %}
-{% set build_number = "0" %}
+{% set build_number = "1" %}
 
 package:
   name: clangdev
@@ -13,7 +13,6 @@ source:
   url: http://llvm.org/releases/{{ version }}/cfe-{{ version }}.src.tar.xz
   sha256: {{ sha256 }}
   patches:
-    # https://github.com/pocl/pocl/issues/1
     - disable-libxml2-detection.patch  # [linux]
 
 {% if clang_variant == "cling" %}
@@ -100,22 +99,35 @@ requirements:
     - m2-xz  # [py27 and win32]
     - m2w64-xz  # [py27 and win64]
 
-    - system  # [linux and not armv7l]
-
     # "compiling .pyc files" fails without this:
     - python
 
     - llvmdev =={{ version }}
-    - libxml2 2.9.*
 {% if clang_variant == "cling" %}
     - cling-patches
 {% endif %}
 
-  run:
-    - system  # [linux and not armv7l]
-    - llvmdev =={{ version }}
-    - libxml2 2.9.*
-    - vs2015_runtime  # [win]
+outputs:
+  - name: libclang
+    script: install-libclang.sh
+    requirements:
+      run:
+        - vs2015_runtime  # [win]
+
+  - name: clang
+    script: install-clang.sh
+    requirements:
+      run:
+        - vs2015_runtime  # [win]
+
+  - name: clangdev
+    script: install-clangdev.sh
+    requirements:
+      run:
+        - llvmdev =={{ version }}
+        - libclang =={{ version }}
+        - clang =={{ version }}
+        - vs2015_runtime  # [win]
 
 test:
   requires:

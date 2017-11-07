@@ -12,4 +12,12 @@ cmake \
   ..
 
 make -j${CPU_COUNT}
-make install
+
+export DESTDIR=${SRC_DIR}/install
+mkdir -p ${DESTDIR}
+make install DESTDIR=${DESTDIR}
+
+cp -r ${DESTDIR}${PREFIX}/include ${PREFIX}
+cp -r ${DESTDIR}${PREFIX}/lib ${PREFIX}
+rm ${PREFIX}/lib/libclang.*
+rm -r ${PREFIX}/lib/clang
