@@ -1,13 +1,11 @@
 #!/bin/bash
 set -x -e
 cd ${SRC_DIR}/build
-make install
-cd "${PREFIX}"
-rm -rf lib/libclang* lib/cmake libexec share include
-mv bin bin2
-mkdir -p bin
-cp bin2/clang-${PKG_VERSION:0:1} bin/
-rm -rf bin2
+make install DESTDIR=${PWD}/install
+cd "${PWD}/install/${PREFIX}"
+cp bin/clang-${PKG_VERSION:0:1} ${PREFIX}/bin/
+cp lib/libclang-cpp* ${PREFIX}/lib/
+cp -Rf lib/clang ${PREFIX}/lib/
 
 ln -s "${PREFIX}/bin/clang-${PKG_VERSION:0:1}" "${PREFIX}/bin/clang-cl"
 ln -s "${PREFIX}/bin/clang-${PKG_VERSION:0:1}" "${PREFIX}/bin/clang-cpp"
